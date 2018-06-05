@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'model.dart';
+import 'package:recipes/model.dart';
+import 'package:recipes/recipe_view.dart';
 
 void main() => runApp(new MyApp());
 
@@ -19,25 +20,25 @@ class MyApp extends StatelessWidget {
 
 final List<Recipe> recipes = [
   Recipe(
-    name: 'Pumpkin Chocolate Chip Cookies',
-    description: 'A delicious British favorite that is moist, sweet and chocolatey!'
-  ),
+      name: 'Pumpkin Chocolate Chip Cookies',
+      description:
+          'A delicious British favorite that is moist, sweet and chocolatey!',
+      imageUrl:
+          'http://www.veganinsanity.com/wp-content/uploads/2014/10/Pumpkin-Oat-Chocolate-Chip-Cookies.jpg'),
   Recipe(
-    name: 'Homemade Beef Chilli',
-    description: 'A country home favorite and delicous on a cold day'
-  ),
+      name: 'Homemade Beef Chilli',
+      description: 'A country home favorite and delicous on a cold day'),
   Recipe(
-    name: 'White Chocolate Cheesecake',
-    description: 'A lighter variant of the popular cheesecake, but still just as sweet'
-  ),
+      name: 'White Chocolate Cheesecake',
+      description:
+          'A lighter variant of the popular cheesecake, but still just as sweet'),
   Recipe(
-    name: 'Gnocchi',
-    description: 'A curly clumpy pasta made from sweet potato or potatoes'
-  ),
+      name: 'Gnocchi',
+      description: 'A curly clumpy pasta made from sweet potato or potatoes'),
   Recipe(
-    name: 'Chicken in a Hurry',
-    description: 'A quick Newfoundland dish that is a tasty onion sauce chicken'
-  ),
+      name: 'Chicken in a Hurry',
+      description:
+          'A quick Newfoundland dish that is a tasty onion sauce chicken'),
 ];
 
 class MyHomePage extends StatefulWidget {
@@ -50,36 +51,67 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   Widget _buildRecipeTile(BuildContext context, int index) {
-    return Text(recipes[index].name);
+    return new GestureDetector(
+      child: new Container(
+        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+        child: new Row(
+          children: <Widget>[
+            new Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: new CircleAvatar(
+                      backgroundImage: recipes[index].recipeImage,
+                    ),
+            ),
+            new Flexible(
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    recipes[index].name,
+                    style: Theme.of(context).textTheme.body2,
+                    textAlign: TextAlign.start,
+                  ),
+                  Text(
+                    recipes[index].description,
+                    style: Theme.of(context).textTheme.caption,
+                    textAlign: TextAlign.start,
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => new RecipeView(recipe: recipes[index]),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(widget.title),
       ),
-      body: new ListView.builder(
-        itemCount: recipes.length,
-        itemBuilder: _buildRecipeTile,
-              ),
-              floatingActionButton: new FloatingActionButton(
-                onPressed: _incrementCounter,
-                tooltip: 'Increment',
-                child: new Icon(Icons.add),
-              ),
-            );
-          }
-        
-          
+      body: new Container(
+        padding: const EdgeInsets.all(16.0),
+        child: new ListView.builder(
+          itemCount: recipes.length,
+          itemBuilder: _buildRecipeTile,
+        ),
+      ),
+      floatingActionButton: new FloatingActionButton(
+        onPressed: () {},
+        tooltip: 'Add Recipe',
+        child: new Icon(Icons.add),
+      ),
+    );
+  }
 }
