@@ -1,36 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:recipes/model.dart';
+import 'package:recipes/recipe_view_header.dart';
 
-class RecipeView extends StatelessWidget {
+const List<MenuChoice> menuChoices = const [
+  const MenuChoice(icon: Icons.edit, name: 'Edit'),
+  const MenuChoice(icon: Icons.share, name: 'Share')
+];
+
+class RecipeView extends StatefulWidget {
   final Recipe recipe;
 
-  const RecipeView({Key key, this.recipe}) : super(key: key);
+  RecipeView({Key key, this.recipe}) : super(key: key);
+
+  @override
+  RecipeViewState createState() {
+    return new RecipeViewState();
+  }
+}
+
+class RecipeViewState extends State<RecipeView> {
+  Widget _getTabControl(String text) => Container(
+        child: Text(text, maxLines: 1, textAlign: TextAlign.start),
+        margin: const EdgeInsets.only(top: 16.0),
+      );
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: AppBar(
-        title: Text(recipe.name),
-      ),
-      body: Column(children: <Widget>[
-        _createHeaderSection(),
-        Center(
-          child: Text(recipe.description),
-        )
-      ]),
+    return DefaultTabController(
+      length: 2,
+      child: new Scaffold(
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(180.0),
+            child: AppBar(
+              bottom: TabBar(
+                isScrollable: false,
+                tabs: <Widget>[
+                  Tab(
+                    child: _getTabControl('Ingredients'),
+                  ),
+                  Tab(
+                    child: _getTabControl('Instructions'),
+                  ),
+                ],
+              ),
+              leading: IconButton(
+                icon: Icon(
+                  widget.recipe.isFavorite
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: widget.recipe.isFavorite ? Colors.red : Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    widget.recipe.isFavorite = !widget.recipe.isFavorite;
+                  });
+                },
+              ),
+              flexibleSpace: RecipeHeader(recipe: widget.recipe),
+              actions: <Widget>[
+                Theme(
+                  data: Theme.of(context).copyWith(
+                      iconTheme: Theme
+                          .of(context)
+                          .iconTheme
+                          .copyWith(color: Colors.white)),
+                  child: PopupMenuButton<MenuChoice>(
+                    itemBuilder: (BuildContext context) {
+                      return menuChoices.map((MenuChoice choice) {
+                        return new PopupMenuItem<MenuChoice>(
+                          value: choice,
+                          child: new Text(choice.name),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TabBarView(
+              children: <Widget>[
+                Text('Ingredients'),
+                Text('Instructions'),
+              ],
+            ),
+          )),
     );
   }
-
-  Widget _createHeaderSection() => AspectRatio(
-        aspectRatio: 16 / 6,
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            image: DecorationImage(
-                image: recipe.recipeImage,
-                alignment: FractionalOffset.center,
-                fit: BoxFit.fitWidth),
-          ),
-        ),
-      );
 }
