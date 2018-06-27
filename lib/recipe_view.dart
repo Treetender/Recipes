@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:recipes/model.dart';
-import 'package:recipes/recipe_view_header.dart';
+import 'package:recipes/recipe_view_appbar.dart';
 
 const List<MenuChoice> menuChoices = const [
   const MenuChoice(icon: Icons.edit, name: 'Edit'),
@@ -93,7 +93,7 @@ class RecipeViewState extends State<RecipeView> {
           appBar: widget.recipe.hasImage
               ? PreferredSize(
                   preferredSize: Size.fromHeight(200.0),
-                  child: _getAppBar(context))
+                  child: RecipeViewImageAppBar(recipe: widget.recipe))
               : _getAppBar(context),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
