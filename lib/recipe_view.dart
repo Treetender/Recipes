@@ -25,60 +25,76 @@ class RecipeViewState extends State<RecipeView> {
         margin: const EdgeInsets.only(top: 16.0),
       );
 
+  Widget _getAppBar(BuildContext context) => AppBar(
+        bottom: TabBar(
+          isScrollable: false,
+          tabs: <Widget>[
+            Tab(
+              child: _getTabControl('Ingredients'),
+            ),
+            Tab(
+              child: _getTabControl('Instructions'),
+            ),
+          ],
+        ),
+        leading: IconButton(
+          icon: Icon(
+            widget.recipe.isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: widget.recipe.isFavorite ? Colors.red : Colors.white,
+          ),
+          onPressed: () {
+            setState(() {
+              widget.recipe.isFavorite = !widget.recipe.isFavorite;
+            });
+          },
+        ),
+        title: Text(
+          widget.recipe.name,
+        ),
+        flexibleSpace: widget.recipe.hasImage
+            ? AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(0.0, 48.0, 0.0, 32.0),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    image: DecorationImage(
+                        image: widget.recipe.recipeImage,
+                        alignment: FractionalOffset.center,
+                        fit: BoxFit.fitWidth),
+                  ),
+                ),
+              )
+            : null,
+        actions: <Widget>[
+          Theme(
+            data: Theme.of(context).copyWith(
+                iconTheme:
+                    Theme.of(context).iconTheme.copyWith(color: Colors.white)),
+            child: PopupMenuButton<MenuChoice>(
+              itemBuilder: (BuildContext context) {
+                return menuChoices.map((MenuChoice choice) {
+                  return new PopupMenuItem<MenuChoice>(
+                    value: choice,
+                    child: new Text(choice.name),
+                  );
+                }).toList();
+              },
+            ),
+          ),
+        ],
+      );
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: new Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(180.0),
-            child: AppBar(
-              bottom: TabBar(
-                isScrollable: false,
-                tabs: <Widget>[
-                  Tab(
-                    child: _getTabControl('Ingredients'),
-                  ),
-                  Tab(
-                    child: _getTabControl('Instructions'),
-                  ),
-                ],
-              ),
-              leading: IconButton(
-                icon: Icon(
-                  widget.recipe.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: widget.recipe.isFavorite ? Colors.red : Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    widget.recipe.isFavorite = !widget.recipe.isFavorite;
-                  });
-                },
-              ),
-              flexibleSpace: RecipeHeader(recipe: widget.recipe),
-              actions: <Widget>[
-                Theme(
-                  data: Theme.of(context).copyWith(
-                      iconTheme: Theme
-                          .of(context)
-                          .iconTheme
-                          .copyWith(color: Colors.white)),
-                  child: PopupMenuButton<MenuChoice>(
-                    itemBuilder: (BuildContext context) {
-                      return menuChoices.map((MenuChoice choice) {
-                        return new PopupMenuItem<MenuChoice>(
-                          value: choice,
-                          child: new Text(choice.name),
-                        );
-                      }).toList();
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+          appBar: widget.recipe.hasImage
+              ? PreferredSize(
+                  preferredSize: Size.fromHeight(200.0),
+                  child: _getAppBar(context))
+              : _getAppBar(context),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TabBarView(
@@ -133,8 +149,7 @@ class RecipeViewState extends State<RecipeView> {
         trailing: Icon(Icons.check_box_outline_blank),
       );
 
-  _buildInstructionTile(BuildContext context, document) => 
-  ListTile(
+  _buildInstructionTile(BuildContext context, document) => ListTile(
         title: Text(document['name'].toString().toUpperCase()),
         subtitle: Text(document['step']),
         trailing: Icon(Icons.check_box_outline_blank),

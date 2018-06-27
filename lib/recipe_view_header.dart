@@ -11,13 +11,17 @@ class RecipeHeader extends StatelessWidget {
     final headLineTheme =
         Theme.of(context).textTheme.headline.apply(color: Colors.white);
 
-    return Stack(
-      fit: StackFit.expand,
+    return Column(
       children: [
+        Text(
+        recipe.name,
+        textAlign: TextAlign.start,
+        style: Theme.of(context).textTheme.headline,
+        softWrap: true,
+      ),
       AspectRatio(
-        aspectRatio: 16 / 9,
+        aspectRatio: 16 / 6,
         child: Container(
-          margin: const EdgeInsets.only(bottom: 32.0),
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
             image: DecorationImage(
@@ -28,23 +32,7 @@ class RecipeHeader extends StatelessWidget {
           ),
         ),
       ),
-      Positioned(
-        child: Text(
-          recipe.name,
-          textAlign: TextAlign.start,
-          style: headLineTheme,
-          softWrap: true,
-        ),
-        bottom: 32.0,
-        left: 16.0,
-      ),
-      Positioned(
-          child: Text(
-            "Time: 1 hour",
-            style: TextStyle(color: Colors.white),
-          ),
-          bottom: 32.0,
-          right: 16.0),
+      
     ]);
   }
 }

@@ -8,6 +8,8 @@ class Recipe {
   double rating;
   bool isFavorite;
 
+  bool get hasImage => imageUrl != null;
+
   Recipe({this.name, this.description, this.imageUrl, this.id, this.rating = 0.0, this.isFavorite = false});
 
   ImageProvider get recipeImage => imageUrl != null
