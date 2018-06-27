@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:recipes/model.dart';
 import 'package:recipes/recipe_view_header.dart';
@@ -82,11 +83,60 @@ class RecipeViewState extends State<RecipeView> {
             padding: const EdgeInsets.all(8.0),
             child: TabBarView(
               children: <Widget>[
-                Text('Ingredients'),
-                Text('Instructions'),
+                StreamBuilder(
+                    stream: Firestore.instance
+                        .collection('recipes')
+                        .document(widget.recipe.id)
+                        .collection('ingredients')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData)
+                        return const Text('Loading Ingredients...');
+                      if (snapshot.data.documents.length == 0)
+                        return const Text(
+                            'Add Ingredients by going into Edit Mode');
+                      return ListView.builder(
+                        itemCount: snapshot.data.documents.length,
+                        itemBuilder: (context, index) => _buildIngredientTile(
+                            context, snapshot.data.documents[index]),
+                      );
+                    }),
+                StreamBuilder(
+                    stream: Firestore.instance
+                        .collection('recipes')
+                        .document(widget.recipe.id)
+                        .collection('instructions')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData)
+                        return const Text('Loading Instructions...');
+                      if (snapshot.data.documents.length == 0)
+                        return const Text(
+                            'Add Instructions by going into Edit Mode');
+                      return ListView.builder(
+                        itemCount: snapshot.data.documents.length,
+                        itemBuilder: (context, index) => _buildInstructionTile(
+                            context, snapshot.data.documents[index]),
+                      );
+                    }),
               ],
             ),
           )),
     );
   }
+
+  _buildIngredientTile(BuildContext context, DocumentSnapshot document) =>
+      ListTile(
+        title: Text(document['name'].toString().toUpperCase()),
+        subtitle: Text("${document['qty']} ${document['measure']}"),
+        leading: Icon(Icons.label),
+        trailing: Icon(Icons.check_box_outline_blank),
+      );
+
+  _buildInstructionTile(BuildContext context, document) => 
+  ListTile(
+        title: Text(document['name'].toString().toUpperCase()),
+        subtitle: Text(document['step']),
+        trailing: Icon(Icons.check_box_outline_blank),
+      );
 }

@@ -59,7 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
       name: document['name'],
       imageUrl: document['imageUrl'],
       rating: double.parse(document['rating'].toString()),
-      isFavorite: false 
+      isFavorite: false,
+      id: document.documentID
     );
     return new GestureDetector(
       child: new Container(

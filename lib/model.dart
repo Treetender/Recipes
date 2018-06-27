@@ -4,10 +4,11 @@ class Recipe {
   String name;
   String description;
   String imageUrl;
+  String id;
   double rating;
   bool isFavorite;
 
-  Recipe({this.name, this.description, this.imageUrl, this.rating = 0.0, this.isFavorite = false});
+  Recipe({this.name, this.description, this.imageUrl, this.id, this.rating = 0.0, this.isFavorite = false});
 
   ImageProvider get recipeImage => imageUrl != null
       ? NetworkImage(imageUrl)
