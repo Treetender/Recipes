@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:recipes/model.dart';
 import 'package:recipes/recipe_view.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -51,7 +53,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Widget _buildRecipeTile(BuildContext context, int index) {
+  Widget _buildRecipeTile(BuildContext context, DocumentSnapshot document) {
+    var recipe = Recipe(
+      description: document['description'],
+      name: document['name'],
+      imageUrl: document['imageUrl'],
+      rating: double.parse(document['rating'].toString()),
+      isFavorite: false 
+    );
     return new GestureDetector(
       child: new Container(
         padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
@@ -60,20 +69,20 @@ class _MyHomePageState extends State<MyHomePage> {
             new Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: new CircleAvatar(
-                      backgroundImage: recipes[index].recipeImage,
-                    ),
+                backgroundImage: recipe.recipeImage,
+              ),
             ),
             new Flexible(
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    recipes[index].name,
+                    recipe.name,
                     style: Theme.of(context).textTheme.body2,
                     textAlign: TextAlign.start,
                   ),
                   Text(
-                    recipes[index].description,
+                    recipe.description,
                     style: Theme.of(context).textTheme.caption,
                     textAlign: TextAlign.start,
                   )
@@ -87,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => new RecipeView(recipe: recipes[index]),
+            builder: (context) => new RecipeView(recipe: recipe),
           ),
         );
       },
@@ -101,12 +110,17 @@ class _MyHomePageState extends State<MyHomePage> {
         title: new Text(widget.title),
       ),
       body: new Container(
-        padding: const EdgeInsets.all(16.0),
-        child: new ListView.builder(
-          itemCount: recipes.length,
-          itemBuilder: _buildRecipeTile,
-        ),
-      ),
+          padding: const EdgeInsets.all(16.0),
+          child: StreamBuilder(
+              stream: Firestore.instance.collection('recipes').snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const Text('Loading....');
+                return ListView.builder(
+                  itemCount: snapshot.data.documents.length,
+                  itemBuilder: (context, index) =>
+                      _buildRecipeTile(context, snapshot.data.documents[index]),
+                );
+              })),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {},
         tooltip: 'Add Recipe',

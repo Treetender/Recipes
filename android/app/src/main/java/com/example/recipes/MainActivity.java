@@ -1,4 +1,4 @@
-package com.example.recipes;
+package com.binarybears.recipes;
 
 import android.os.Bundle;
 
