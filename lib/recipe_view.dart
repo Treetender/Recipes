@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:recipes/model.dart';
-import 'package:recipes/recipe_view_appbar.dart';
 
 const List<MenuChoice> menuChoices = const [
   const MenuChoice(icon: Icons.edit, name: 'Edit'),
@@ -20,69 +19,76 @@ class RecipeView extends StatefulWidget {
 }
 
 class RecipeViewState extends State<RecipeView> {
-  Widget _getTabControl(String text) => Container(
-        child: Text(text, maxLines: 1, textAlign: TextAlign.start),
-        margin: const EdgeInsets.only(top: 16.0),
+
+  Widget _getHeartButton(BuildContext context) => IconButton(
+        icon: Icon(
+            widget.recipe.isFavorite ? Icons.favorite : Icons.favorite_border),
+        color: widget.recipe.isFavorite ? Colors.red : Colors.white,
+        onPressed: () {
+          setState(() {
+            widget.recipe.isFavorite = !widget.recipe.isFavorite;
+          });
+        },
       );
 
-  Widget _getAppBar(BuildContext context) => AppBar(
-        bottom: TabBar(
-          isScrollable: false,
-          tabs: <Widget>[
-            Tab(
-              child: _getTabControl('Ingredients'),
-            ),
-            Tab(
-              child: _getTabControl('Instructions'),
-            ),
-          ],
-        ),
-        leading: IconButton(
-          icon: Icon(
-            widget.recipe.isFavorite ? Icons.favorite : Icons.favorite_border,
-            color: widget.recipe.isFavorite ? Colors.red : Colors.white,
-          ),
-          onPressed: () {
-            setState(() {
-              widget.recipe.isFavorite = !widget.recipe.isFavorite;
-            });
+  Widget _getAppBarMenu(BuildContext context) => Theme(
+        data: Theme.of(context).copyWith(
+            iconTheme:
+                Theme.of(context).iconTheme.copyWith(color: Colors.white)),
+        child: PopupMenuButton<MenuChoice>(
+          itemBuilder: (BuildContext context) {
+            return menuChoices.map((MenuChoice choice) {
+              return PopupMenuItem<MenuChoice>(
+                value: choice,
+                child: Row(
+                  children: <Widget>[
+                    Icon(choice.icon),
+                    Text(choice.name),
+                  ],
+                ),
+              );
+            }).toList();
           },
         ),
-        title: Text(
-          widget.recipe.name,
-        ),
-        flexibleSpace: widget.recipe.hasImage
-            ? AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(0.0, 48.0, 0.0, 32.0),
-                  decoration: BoxDecoration(
+      );
+
+  Widget _buildAppBarWithImage(BuildContext context) => PreferredSize(
+        preferredSize: Size.fromHeight(222.0),
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Container(
+                decoration: BoxDecoration(
                     shape: BoxShape.rectangle,
                     image: DecorationImage(
                         image: widget.recipe.recipeImage,
                         alignment: FractionalOffset.center,
-                        fit: BoxFit.fitWidth),
-                  ),
-                ),
-              )
-            : null,
-        actions: <Widget>[
-          Theme(
-            data: Theme.of(context).copyWith(
-                iconTheme:
-                    Theme.of(context).iconTheme.copyWith(color: Colors.white)),
-            child: PopupMenuButton<MenuChoice>(
-              itemBuilder: (BuildContext context) {
-                return menuChoices.map((MenuChoice choice) {
-                  return new PopupMenuItem<MenuChoice>(
-                    value: choice,
-                    child: new Text(choice.name),
-                  );
-                }).toList();
-              },
+                        fit: BoxFit.fitWidth)),
+              ),
             ),
-          ),
-        ],
+            Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Container(
+                  decoration: BoxDecoration(color: Colors.black26),
+                  child: Row(children: <Widget>[
+                    _getHeartButton(context),
+                    Expanded(
+                                          child: Text(widget.recipe.name,
+                          style: Theme
+                              .of(context)
+                              .textTheme
+                              .headline
+                              .apply(color: Colors.white)),
+                    ),
+                    _getAppBarMenu(context),
+                  ])),
+            ),
+          ],
+        ),
       );
 
   @override
@@ -91,10 +97,12 @@ class RecipeViewState extends State<RecipeView> {
       length: 2,
       child: new Scaffold(
           appBar: widget.recipe.hasImage
-              ? PreferredSize(
-                  preferredSize: Size.fromHeight(200.0),
-                  child: RecipeViewImageAppBar(recipe: widget.recipe))
-              : _getAppBar(context),
+              ? _buildAppBarWithImage(context)
+              : AppBar(
+                  leading: _getHeartButton(context),
+                  actions: <Widget>[_getAppBarMenu(context)],
+                  title: Text(widget.recipe.name),
+                ),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TabBarView(

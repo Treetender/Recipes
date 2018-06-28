@@ -8,9 +8,6 @@ class RecipeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headLineTheme =
-        Theme.of(context).textTheme.headline.apply(color: Colors.white);
-
     return Column(
       children: [
         Text(
