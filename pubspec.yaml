@@ -3,6 +3,7 @@ description: A flutter based cookbook.
 
 dependencies:
   cloud_firestore:
+  bubble_tab_indicator: "^0.1.2"
   flutter:
     sdk: flutter
 
