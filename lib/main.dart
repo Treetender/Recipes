@@ -20,29 +20,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-final List<Recipe> recipes = [
-  Recipe(
-      name: 'Pumpkin Chocolate Chip Cookies',
-      description:
-          'A delicious British favorite that is moist, sweet and chocolatey!',
-      imageUrl:
-          'http://www.veganinsanity.com/wp-content/uploads/2014/10/Pumpkin-Oat-Chocolate-Chip-Cookies.jpg'),
-  Recipe(
-      name: 'Homemade Beef Chilli',
-      description: 'A country home favorite and delicous on a cold day'),
-  Recipe(
-      name: 'White Chocolate Cheesecake',
-      description:
-          'A lighter variant of the popular cheesecake, but still just as sweet'),
-  Recipe(
-      name: 'Gnocchi',
-      description: 'A curly clumpy pasta made from sweet potato or potatoes'),
-  Recipe(
-      name: 'Chicken in a Hurry',
-      description:
-          'A quick Newfoundland dish that is a tasty onion sauce chicken'),
-];
-
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 

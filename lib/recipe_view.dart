@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:recipes/model.dart';
+import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 
 const List<MenuChoice> menuChoices = const [
   const MenuChoice(icon: Icons.edit, name: 'Edit'),
@@ -19,11 +20,27 @@ class RecipeView extends StatefulWidget {
 }
 
 class RecipeViewState extends State<RecipeView> {
+  Widget _getTabBar(BuildContext context) => TabBar(
+        labelColor: Theme.of(context).canvasColor,
+        unselectedLabelColor: Theme.of(context).unselectedWidgetColor,
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: new BubbleTabIndicator(
+          indicatorHeight: 18.0,
+          indicatorColor: Theme.of(context).primaryColorDark,
+          tabBarIndicatorSize: TabBarIndicatorSize.tab,
+        ),
+        tabs: <Widget>[
+          Text('Ingredients'),
+          Text('Instructions'),
+        ],
+      );
 
   Widget _getHeartButton(BuildContext context) => IconButton(
         icon: Icon(
             widget.recipe.isFavorite ? Icons.favorite : Icons.favorite_border),
-        color: widget.recipe.isFavorite ? Colors.red : Colors.white,
+        color: widget.recipe.isFavorite
+            ? Theme.of(context).primaryColor
+            : Colors.white,
         onPressed: () {
           setState(() {
             widget.recipe.isFavorite = !widget.recipe.isFavorite;
@@ -77,7 +94,7 @@ class RecipeViewState extends State<RecipeView> {
                   child: Row(children: <Widget>[
                     _getHeartButton(context),
                     Expanded(
-                                          child: Text(widget.recipe.name,
+                      child: Text(widget.recipe.name,
                           style: Theme
                               .of(context)
                               .textTheme
@@ -87,9 +104,54 @@ class RecipeViewState extends State<RecipeView> {
                     _getAppBarMenu(context),
                   ])),
             ),
+            Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Container(
+                  decoration:
+                      BoxDecoration(color: Theme.of(context).canvasColor),
+                  child: _getTabBar(context)),
+            ),
           ],
         ),
       );
+
+  StreamBuilder _getIngredientView(BuildContext context) => StreamBuilder(
+      stream: Firestore.instance
+          .collection('recipes')
+          .document(widget.recipe.id)
+          .collection('ingredients')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const Text('Loading Ingredients...');
+        if (snapshot.data.documents.length == 0)
+          return Text('Add Ingredients by going into Edit Mode',
+              style: TextStyle(color: Theme.of(context).hintColor));
+        return ListView.builder(
+          itemCount: snapshot.data.documents.length,
+          itemBuilder: (context, index) =>
+              _buildIngredientTile(context, snapshot.data.documents[index]),
+        );
+      });
+
+  StreamBuilder _getInstructionView(BuildContext context) => StreamBuilder(
+      stream: Firestore.instance
+          .collection('recipes')
+          .document(widget.recipe.id)
+          .collection('instructions')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const Text('Loading Instructions...');
+        if (snapshot.data.documents.length == 0)
+          return Text('Add Instructions by going into Edit Mode',
+              style: TextStyle(color: Theme.of(context).hintColor));
+        return ListView.builder(
+          itemCount: snapshot.data.documents.length,
+          itemBuilder: (context, index) =>
+              _buildInstructionTile(context, snapshot.data.documents[index]),
+        );
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -102,47 +164,14 @@ class RecipeViewState extends State<RecipeView> {
                   leading: _getHeartButton(context),
                   actions: <Widget>[_getAppBarMenu(context)],
                   title: Text(widget.recipe.name),
+                  bottom: _getTabBar(context),
                 ),
           body: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TabBarView(
               children: <Widget>[
-                StreamBuilder(
-                    stream: Firestore.instance
-                        .collection('recipes')
-                        .document(widget.recipe.id)
-                        .collection('ingredients')
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData)
-                        return const Text('Loading Ingredients...');
-                      if (snapshot.data.documents.length == 0)
-                        return const Text(
-                            'Add Ingredients by going into Edit Mode');
-                      return ListView.builder(
-                        itemCount: snapshot.data.documents.length,
-                        itemBuilder: (context, index) => _buildIngredientTile(
-                            context, snapshot.data.documents[index]),
-                      );
-                    }),
-                StreamBuilder(
-                    stream: Firestore.instance
-                        .collection('recipes')
-                        .document(widget.recipe.id)
-                        .collection('instructions')
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData)
-                        return const Text('Loading Instructions...');
-                      if (snapshot.data.documents.length == 0)
-                        return const Text(
-                            'Add Instructions by going into Edit Mode');
-                      return ListView.builder(
-                        itemCount: snapshot.data.documents.length,
-                        itemBuilder: (context, index) => _buildInstructionTile(
-                            context, snapshot.data.documents[index]),
-                      );
-                    }),
+                _getIngredientView(context),
+                _getInstructionView(context),
               ],
             ),
           )),
